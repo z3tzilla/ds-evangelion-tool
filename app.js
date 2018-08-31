@@ -1,4 +1,8 @@
-const EvangelionConverter = require("./utils")
+#!/usr/bin/env node
 
-const converter = new EvangelionConverter("out.png", true)
-converter.convert("out.bin")
+const Args = require('./utils/args')
+const EvangelionConverter = require("./utils/converter")
+
+const argv = Args.parse
+const converter = new EvangelionConverter(argv.input, argv.bin, argv.width)
+converter.convert(argv.output)

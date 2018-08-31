@@ -1,4 +1,5 @@
 const fs = require('fs')
+const path = require('path')
 const jimp = require('jimp')
 
 class EvangelionConverter {
@@ -15,14 +16,14 @@ class EvangelionConverter {
 
     async convert(newPath) {
         if (this.isBinary) {
-            const stat = fs.statSync('0CDF020C.bin')
+            const stat = fs.statSync(this.path)
             const width = this.width
             const height = stat.size * 2 / width
 
             const image = new jimp(width, height)
             let index = 0
             
-            const input = fs.createReadStream('0CDF020C.bin')
+            const input = fs.createReadStream(this.path)
             input.on("data", data => {
               data.forEach(byte => {
             
@@ -43,12 +44,13 @@ class EvangelionConverter {
             
             input.on("close", () => {
               input.close()
-              
-              image.write(newPath, (err) => {
-                if (err) throw err
-              })
+              image.write(newPath, err => { if (err) throw err })
             })
-        } else {
+
+            return
+        }
+
+        try {
             const inputImage = await jimp.read(this.path)
             const width = inputImage.bitmap.width
             const height = inputImage.bitmap.height
@@ -69,7 +71,13 @@ class EvangelionConverter {
                 }
                 output.write(data)
             }
+
             output.close()
+
+            return
+        } catch (err) {
+            console.error(err.message)
+            process.exit(1)
         }
     }
 }
